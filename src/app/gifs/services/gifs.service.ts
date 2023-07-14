@@ -19,7 +19,7 @@ export class GifsService {
 
 
   private apiKey     : string    = "tvMa6zaNXG6AEUY5O1BnO0KO0XeubaQj";
-  private gifApi     : string    = "http://api.giphy.com/v1/gifs";
+  private gifApi     : string    = "https://api.giphy.com/v1/gifs";
   private _historial : string[]  = [];
   public resutado    : GifData[] = [];
 
@@ -34,7 +34,7 @@ export class GifsService {
   buscarGifs(query: string) {
     query = query.trim().toLowerCase();
 
-    // si la busqueda ya esta en el hostorial no lo agrega al historial 
+    // si la busqueda ya esta en el hostorial no lo agrega al historial
     if (!this._historial.includes(query)) {
       this._historial.unshift(query);
       this._historial = this._historial.splice(0, 10);
