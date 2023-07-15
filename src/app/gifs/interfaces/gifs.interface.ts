@@ -1,4 +1,4 @@
-export interface SearchGIFResponse {
+export interface GifResponse {
     data:       GifData[];
     pagination: Pagination;
     meta:       Meta;

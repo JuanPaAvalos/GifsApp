@@ -9,9 +9,9 @@ import { GifsService } from '../services/gifs.service';
 export class ResultsComponent  {
 
   constructor(private gifsService:GifsService) { }
-  
+
   get resultados(){
-    return this.gifsService.resutado; 
+    return this.gifsService.resut;
   }
 
 
