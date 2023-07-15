@@ -1,63 +1,60 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
-import { SearchGIFResponse, GifData } from '../interfaces/gifs.interface';
+import { GifResponse, GifData } from '../interfaces/gifs.interface';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GifsService {
-
   constructor(private http: HttpClient) {
-
-    this._historial = JSON.parse(localStorage.getItem('historial')!) || [];
-    this.resutado = JSON.parse(localStorage.getItem('ultimoResultado')!) || [];
-
-    // if (localStorage.getItem('historial')){
-    //   this._historial = JSON.parse(localStorage.getItem('historial')!)
-    // }
+    this.loadLocalHistory();
   }
 
-
-  private apiKey     : string    = "tvMa6zaNXG6AEUY5O1BnO0KO0XeubaQj";
-  private gifApi     : string    = "https://api.giphy.com/v1/gifs";
-  private _historial : string[]  = [];
-  public resutado    : GifData[] = [];
-
-
+  private apiKey: string = 'tvMa6zaNXG6AEUY5O1BnO0KO0XeubaQj';
+  private gifApi: string = 'https://api.giphy.com/v1/gifs';
+  private _history: string[] = [];
+  public resut: GifData[] = [];
 
   get historial() {
     //?  se utliza el operador spread `...` para romper la relacion con el arreglo privado del servicio
-    return [...this._historial];
+    return [...this._history];
   }
 
+  private saveHistory(): void {
+    localStorage.setItem('historial', JSON.stringify(this._history));
+  }
 
-  buscarGifs(query: string) {
-    query = query.trim().toLowerCase();
+  private loadLocalHistory(): void {
+    this._history = JSON.parse(localStorage.getItem('historial')!) || [];
+    this.resut = JSON.parse(localStorage.getItem('lastResult')!) || [];
+  }
 
-    // si la busqueda ya esta en el hostorial no lo agrega al historial
-    if (!this._historial.includes(query)) {
-      this._historial.unshift(query);
-      this._historial = this._historial.splice(0, 10);
+  private updateHistory(searchTag: string) {
+    searchTag = searchTag.trim().toLowerCase();
 
-      //? se guarda el historial en localstorage pasando el arreglo a string con una funcon de JSON
-      localStorage.setItem('historial', JSON.stringify(this._historial));
+    if (this._history.includes(searchTag)) {
+      this._history = this._history.filter((oldTag) => oldTag != searchTag);
     }
 
+    this._history.unshift(searchTag);
+    this._history = this._history.splice(0, 10);
+    this.saveHistory();
+  }
 
-    //? http params permite construir parametros de una peticion ( valorDeLaApi , datoEnviado)
+  buscarGifs(searchTag: string) {
+    if (searchTag.trim().length == 0) return;
+    this.updateHistory(searchTag);
+
     const params = new HttpParams()
       .set('api_key', this.apiKey)
       .set('limit', '20')
-      .set('q' , query);
+      .set('q', searchTag);
 
-    //? Se creo una interface en https://app.quicktype.io/ con la respuesta de la peticon en postman
-    //? La interface permite recibir la data con un tipado al hacer la peticion
-    this.http.get<SearchGIFResponse>(`${this.gifApi}/search`, { params })
+    this.http
+      .get<GifResponse>(`${this.gifApi}/search`, { params })
       .subscribe((res) => {
-        console.log(res.data);
-        this.resutado = res.data;
-        localStorage.setItem('ultimoResultado', JSON.stringify(this.resutado));
+        this.resut = res.data;
+        localStorage.setItem('lastResult', JSON.stringify(this.resut));
       });
-
   }
 }
